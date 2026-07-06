@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — SocialSurge</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <a href="/" class="logo">Social<span>Surge</span> <small style="color:var(--text-muted)">Admin</small></a>
+      <a href="/logout">Logout</a>
+    </div>
+
+    <section class="section">
+      <div class="grid" style="grid-template-columns: repeat(4,1fr);">
+        <div class="card"><h3><%= stats.totalUsers %></h3><p>Total Users</p></div>
+        <div class="card"><h3><%= stats.totalOrders %></h3><p>Total Orders</p></div>
+        <div class="card"><h3>₹<%= stats.totalRevenue.toFixed(2) %></h3><p>Total Revenue</p></div>
+        <div class="card"><h3><%= stats.pendingOrders %></h3><p>Pending Orders</p></div>
+        <div class="card"><h3><%= stats.pendingDeposits %></h3><p>Pending Deposits</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Deposit Requests (Payment Approval)</h2>
+      <table>
+        <thead><tr><th>User</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <% depositRequests.forEach(r => { %>
+            <tr>
+              <td><%= r.user_email %></td>
+              <td>₹<%= r.amount.toFixed(2) %></td>
+              <td><%= r.method %></td>
+              <td><%= r.reference %></td>
+              <td><span class="status status-<%= r.status === 'approved' ? 'completed' : (r.status === 'rejected' ? 'cancelled' : 'pending') %>"><%= r.status %></span></td>
+              <td>
+                <% if (r.status === 'pending') { %>
+                  <form method="POST" action="/admin/deposit/<%= r.id %>/approve" style="display:inline">
+                    <button type="submit" class="btn btn-primary">Approve</button>
+                  </form>
+                  <form method="POST" action="/admin/deposit/<%= r.id %>/reject" style="display:inline">
+                    <button type="submit" class="btn btn-outline">Reject</button>
+                  </form>
+                <% } else { %>
+                  —
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (depositRequests.length === 0) { %>
+            <tr><td colspan="6" style="color:var(--text-muted)">Koi request nahi.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Naya Service Add Karein</h2>
+      <form method="POST" action="/admin/service/add" class="card">
+        <div class="field"><label>Category (e.g. Instagram)</label><input type="text" name="category" required></div>
+        <div class="field"><label>Service Name</label><input type="text" name="name" required></div>
+        <div class="field"><label>Supplier Service ID</label><input type="text" name="supplier_service_id"></div>
+        <div class="field"><label>Rate per 1000 (₹)</label><input type="number" step="0.01" name="rate_per_1000" required></div>
+        <div class="field"><label>Min Quantity</label><input type="number" name="min_quantity" required></div>
+        <div class="field"><label>Max Quantity</label><input type="number" name="max_quantity" required></div>
+        <button type="submit" class="btn btn-primary">Service Add Karein</button>
+      </form>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Sabhi Services</h2>
+      <table>
+        <thead><tr><th>Category</th><th>Name</th><th>Rate/1000</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <% services.forEach(s => { %>
+            <tr>
+              <td><%= s.category %></td>
+              <td><%= s.name %></td>
+              <td>₹<%= s.rate_per_1000 %></td>
+              <td><%= s.active ? 'Active' : 'Off' %></td>
+              <td>
+                <form method="POST" action="/admin/service/toggle/<%= s.id %>" style="display:inline">
+                  <button type="submit" class="btn btn-outline"><%= s.active ? 'Turn Off' : 'Turn On' %></button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Sabhi Orders</h2>
+      <table>
+        <thead><tr><th>ID</th><th>User</th><th>Service</th><th>Qty</th><th>Charge</th><th>Status</th><th>Update</th></tr></thead>
+        <tbody>
+          <% orders.forEach(o => { %>
+            <tr>
+              <td>#<%= o.id %></td>
+              <td><%= o.user_email %></td>
+              <td><%= o.service_name %></td>
+              <td><%= o.quantity %></td>
+              <td>₹<%= o.charge.toFixed(2) %></td>
+              <td><span class="status status-<%= o.status %>"><%= o.status %></span></td>
+              <td>
+                <form method="POST" action="/admin/order/status/<%= o.id %>" style="display:flex; gap:6px;">
+                  <select name="status">
+                    <option value="pending" <%= o.status==='pending'?'selected':'' %>>Pending</option>
+                    <option value="in_progress" <%= o.status==='in_progress'?'selected':'' %>>In Progress</option>
+                    <option value="completed" <%= o.status==='completed'?'selected':'' %>>Completed</option>
+                    <option value="cancelled" <%= o.status==='cancelled'?'selected':'' %>>Cancelled</option>
+                  </select>
+                  <button type="submit" class="btn btn-outline">Save</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Sabhi Users</h2>
+      <table>
+        <thead><tr><th>Naam</th><th>Email</th><th>Balance</th><th>Role</th></tr></thead>
+        <tbody>
+          <% users.forEach(u => { %>
+            <tr><td><%= u.name %></td><td><%= u.email %></td><td>₹<%= u.balance.toFixed(2) %></td><td><%= u.role %></td></tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

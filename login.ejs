@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — SocialSurge</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav">
+      <a href="/" class="logo">Social<span>Surge</span></a>
+    </nav>
+    <div class="auth-wrap">
+      <h2>Login karein</h2>
+      <% if (error) { %><div class="error-box"><%= error %></div><% } %>
+      <form method="POST" action="/login">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" required>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Login</button>
+      </form>
+      <div class="auth-footer">Account nahi hai? <a href="/signup">Sign up karein</a></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet — SocialSurge</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <a href="/" class="logo">Social<span>Surge</span></a>
+      <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+
+    <section class="section">
+      <h2 class="section-title">Wallet — Balance: ₹<%= user.balance.toFixed(2) %></h2>
+
+      <div class="card" style="max-width:460px;">
+        <h3>Step 1: Payment Karein</h3>
+        <p style="margin:10px 0;">Neeche diye UPI ID par apna amount bhej dein:</p>
+        <p style="font-size:18px; color:var(--accent); font-weight:600;"><%= upiId %></p>
+        <p style="color:var(--text-muted); font-size:13px;">Naam: <%= upiName %></p>
+      </div>
+
+      <div class="card" style="max-width:460px; margin-top:20px;">
+        <h3>Step 2: Request Submit Karein</h3>
+        <p style="margin-bottom:16px; color:var(--text-muted); font-size:13px;">
+          Payment karne ke baad UTR/Transaction ID daal kar request bhejein. Admin verify karke balance add karega (kuch samay lag sakta hai).
+        </p>
+        <form method="POST" action="/wallet/request">
+          <div class="field">
+            <label>Amount (₹) jo bheja hai</label>
+            <input type="number" name="amount" min="1" required>
+          </div>
+          <div class="field">
+            <label>Payment Method</label>
+            <select name="method">
+              <option value="UPI">UPI</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>UTR / Transaction ID / Reference</label>
+            <input type="text" name="reference" placeholder="Payment app me milega" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Request Bhejein</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Meri Deposit Requests</h2>
+      <table>
+        <thead><tr><th>Amount</th><th>Reference</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          <% myRequests.forEach(r => { %>
+            <tr>
+              <td>₹<%= r.amount.toFixed(2) %></td>
+              <td><%= r.reference %></td>
+              <td><span class="status status-<%= r.status === 'approved' ? 'completed' : (r.status === 'rejected' ? 'cancelled' : 'pending') %>"><%= r.status %></span></td>
+              <td><%= new Date(r.created_at).toLocaleDateString('hi-IN') %></td>
+            </tr>
+          <% }) %>
+          <% if (myRequests.length === 0) { %>
+            <tr><td colspan="4" style="color:var(--text-muted)">Abhi koi request nahi.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">Transaction History (Approved)</h2>
+      <table>
+        <thead><tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          <% transactions.forEach(t => { %>
+            <tr>
+              <td><%= t.type === 'deposit' ? 'Add Funds' : 'Order Payment' %></td>
+              <td>₹<%= t.amount.toFixed(2) %></td>
+              <td><%= t.status %></td>
+              <td><%= new Date(t.created_at).toLocaleDateString('hi-IN') %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>
